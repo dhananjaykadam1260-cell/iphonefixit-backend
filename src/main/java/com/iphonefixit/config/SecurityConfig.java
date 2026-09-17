@@ -2,7 +2,6 @@ package com.iphonefixit.config;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,24 +23,20 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
-    @Value("${app.frontend-url}")
-    private String frontendUrl;
-
-    public SecurityConfig(
-            JwtAuthenticationFilter jwtFilter) {
-
+    public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http)
-            throws Exception {
+            HttpSecurity http) throws Exception {
 
         http
             .csrf(csrf -> csrf.disable())
 
-            .cors(cors -> {})
+            .cors(cors ->
+                cors.configurationSource(corsConfigurationSource())
+            )
 
             .sessionManagement(session ->
                 session.sessionCreationPolicy(
@@ -51,6 +46,7 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
+                // PUBLIC APIs
                 .requestMatchers(
                     "/api/auth/**",
                     "/api/repairs/phone/**",
@@ -63,11 +59,13 @@ public class SecurityConfig {
                 )
                 .permitAll()
 
+                // ADMIN ONLY
                 .requestMatchers(
                     "/api/admin/**"
                 )
                 .hasRole("ADMIN")
 
+                // ADMIN + SUBADMIN
                 .requestMatchers(
                     "/api/dashboard/**",
                     "/api/customers/**",
@@ -99,27 +97,34 @@ public class SecurityConfig {
                 new CorsConfiguration();
 
         config.setAllowedOrigins(
-                List.of(
-                    "http://localhost:5173",
-                    frontendUrl
-                )
+            List.of(
+                "http://localhost:5173",
+                "https://iphonefixit-frontend.onrender.com"
+            )
         );
 
         config.setAllowedMethods(
-                List.of(
-                    "GET",
-                    "POST",
-                    "PUT",
-                    "DELETE",
-                    "OPTIONS"
-                )
+            List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
+            )
         );
 
         config.setAllowedHeaders(
-                List.of("*")
+            List.of("*")
+        );
+
+        config.setExposedHeaders(
+            List.of("Authorization")
         );
 
         config.setAllowCredentials(true);
+
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
