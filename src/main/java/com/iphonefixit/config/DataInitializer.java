@@ -5,12 +5,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.iphonefixit.entity.*;
+import com.iphonefixit.entity.AdminUser;
+import com.iphonefixit.entity.Role;
 import com.iphonefixit.repository.AdminUserRepository;
 
 @Component
-public class DataInitializer
-        implements CommandLineRunner {
+public class DataInitializer implements CommandLineRunner {
 
     private final AdminUserRepository repository;
     private final PasswordEncoder passwordEncoder;
@@ -35,24 +35,24 @@ public class DataInitializer
     @Override
     public void run(String... args) {
 
-        if (!repository.existsByEmail(adminEmail)) {
+        AdminUser admin = repository
+                .findByEmail(adminEmail)
+                .orElseGet(AdminUser::new);
 
-            AdminUser admin =
-                new AdminUser();
+        admin.setName(adminName);
+        admin.setEmail(adminEmail);
 
-            admin.setName(adminName);
-            admin.setEmail(adminEmail);
+        admin.setPassword(
+                passwordEncoder.encode(adminPassword)
+        );
 
-            admin.setPassword(
-                passwordEncoder.encode(
-                    adminPassword));
+        admin.setRole(Role.ROLE_ADMIN);
+        admin.setActive(true);
 
-            admin.setRole(
-                Role.ROLE_ADMIN);
+        repository.save(admin);
 
-            admin.setActive(true);
-
-            repository.save(admin);
-        }
+        System.out.println(
+                "Admin account initialized: " + adminEmail
+        );
     }
 }
