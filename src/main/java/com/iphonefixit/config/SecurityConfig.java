@@ -1,6 +1,7 @@
 package com.iphonefixit.config;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,9 @@ import com.iphonefixit.security.JwtAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     private final JwtAuthenticationFilter jwtFilter;
 
@@ -99,7 +103,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(
             List.of(
                 "http://localhost:5173",
-                "https://iphonefixit-frontend.onrender.com"
+                frontendUrl
             )
         );
 

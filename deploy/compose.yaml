@@ -1,0 +1,29 @@
+name: iphonefixit-backend
+services:
+  backend:
+    image: ${IMAGE:?Set IMAGE to the backend image}
+    restart: unless-stopped
+    env_file:
+      - path: /opt/iphonefixit/backend.env
+        format: raw
+    environment:
+      PORT: "8080"
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    networks:
+      app:
+        aliases:
+          - iphonefixit-api
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  uploads:
+    name: iphonefixit-uploads
+networks:
+  app:
+    external: true
+    name: iphonefixit

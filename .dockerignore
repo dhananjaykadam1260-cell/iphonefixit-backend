@@ -1,6 +1,8 @@
-target
 .git
-.idea
-.vscode
-*.log
+.github
+.env
+.env.*
+target
+bin
 uploads
+deploy
